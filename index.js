@@ -1,30 +1,29 @@
 const d = document;
 const displayValuePrev = d.getElementById("previous-value");
 const displayValueCurrent = d.getElementById("current-value");
-const calculatorContent = d.querySelector(".calculator-content");
-const buttons = calculatorContent.querySelector(".calculator-buttons");
+const operationsButtons = d.querySelectorAll(".operation-buttons");
+const numberButtons = d.querySelectorAll(".number-buttons");
 
 class Calculator {
-  add(number, number2){
+  add(number, number2) {
     return number + number2;
   }
 
-  subtract(number, number2){
+  subtract(number, number2) {
     return number - number2;
   }
 
-  divide(number, number2){
+  divide(number, number2) {
     return number / number2;
   }
 
-  multiply(number, number2){
+  multiply(number, number2) {
     return number * number2;
   }
-  
-  module(number, number2){
+
+  module(number, number2) {
     return number % number2;
   }
-
 }
 
 class Display {
@@ -34,43 +33,67 @@ class Display {
     this.calculator = new Calculator();
     this.currentValue = "";
     this.previousValue = "";
+    this.typeOperation = undefined;
+    this.signs = {
+      add: '+',
+      divide: '/',
+      subtract: '-',
+      multiply: 'x'
+    }
   }
 
-  delete(){
-    this.currentValue = this.currentValue.toString().slice(0,-1);
+  compute(typeOperation){
+    this.typeOperation !== 'equal' && this.calculate();
+    console.log(this.typeOperation);
+    this.typeOperation = typeOperation;
+    this.previousValue = this.currentValue || this.previousValue;
+    this.currentValue = '';
+    this.printValues();
+
+  }
+
+  delete() {
+    this.currentValue = this.currentValue.toString().slice(0, -1);
     this.printValues();
   }
 
-  addNumber(number){
-    if(number === '.' && this.currentValue.includes('.')) return
+  deleteAll(){
+    this.currentValue = '';
+    this.previousValue = '';
+    this.typeOperation = undefined;
+    this.printValues();
+  }
+
+  addNumber(number) {
+    if (number === "." && this.currentValue.includes(".")) return;
     this.currentValue = this.currentValue.toString() + number.toString();
     this.printValues();
   }
 
-  printValues(){
+  printValues() {
     this.displayValueCurrent.textContent = this.currentValue;
-    this.displayValuePrev.textContent = this.previousValue;
+    this.displayValuePrev.textContent = `${this.previousValue} ${this.signs[this.typeOperation] || ''}`;
   }
 
+  calculate(){
+    const previousValue = parseFloat(this.previousValue);
+    const currentValue = parseFloat(this.currentValue);
+
+    if(isNaN(currentValue) || isNaN(previousValue)) return 
+
+    this.currentValue = this.calculator[this.typeOperation](previousValue, currentValue);
+
+  }
 }
 
 const display = new Display(displayValuePrev, displayValueCurrent);
 
 // Know the type of button we are pressing.
 
-buttons.addEventListener("click", buttonPressed);
+numberButtons.forEach((button) => {
+  button.addEventListener("click", () => display.addNumber(button.innerHTML));
+});
 
-function buttonPressed(e){
-  const button = e.target;
-  const action = button.dataset.action;
-  const buttonContent = button.textContent;
-  console.log(button);
-  console.log(buttonContent);
-
-  display.addNumber(buttonContent);
-}
-
-
-
-
-
+operationsButtons.forEach((button) => {
+  button.addEventListener("click", () => display.compute(button.value));
+});
