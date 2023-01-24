@@ -65,7 +65,8 @@ body {
   border: 0;
 }
 
-.clear-buttons {
+.clear-buttons, 
+.clear {
   background-color: orangered;
 }
 
